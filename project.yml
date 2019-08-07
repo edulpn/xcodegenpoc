@@ -1,0 +1,115 @@
+name: XcodeGenPOC
+configs:
+  Dev: debug
+  Beta: release
+  Prod: release
+options:
+  bundleIdPrefix: com.edulpn.xcodegenpoc
+  createIntermediateGroups: true
+  usesTabs: true
+  xcodeVersion: 10.1
+  groupSortPosition: top
+  transitivelyLinkDependencies: true
+  defaultConfig: Prod
+  deploymentTarget:
+  iOS: 12.0
+settings:
+  base:
+    ENABLE_TESTING: false
+    SWIFT_VERSION: 4.2
+  configs:
+    Dev:
+      ENABLE_TESTING: true
+targets:
+  App:
+    type: application
+    platform: iOS
+    sources: [App]
+    info:
+      path: App/Info.plist
+    dependencies: [
+      target: Framework
+    ]
+    settings:
+      configs:
+        Dev:
+          PRODUCT_BUNDLE_IDENTIFIER: com.edulpn.xcodegenpoc.dev
+        Beta:
+          PRODUCT_BUNDLE_IDENTIFIER: com.edulpn.xcodegenpoc.beta
+        Prod:
+          PRODUCT_BUNDLE_IDENTIFIER: com.edulpn.xcodegenpoc
+  Framework:
+    type: framework
+    platform: iOS
+    sources: [Framework]
+    info:
+      path: Framework/Info.plist
+  FrameworkUnitTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [FrameworkUnitTests]
+    info:
+      path: FrameworkUnitTests/Info.plist
+    dependencies: [
+      target: Framework
+    ]
+  AppUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [AppUITests]
+    info:
+      path: AppUITests/Info.plist
+    dependencies: [
+      target: App
+    ]
+schemes:
+  App-Dev:
+    build:
+      targets:
+        App: [run, test, analyze]
+        Framework: [run, test, analyze]
+    run:
+      config: Dev
+    test:
+      config: Dev
+      gatherCoverageData: true
+      targets: [AppUITests, FrameworkUnitTests]
+    analyze:
+      config: Dev
+  App-Beta:
+    build:
+      targets:
+        App: [run, archive]
+        Framework: [run, archive]
+    run:
+      config: Beta
+    profile:
+      config: Beta
+    archive:
+      config: Beta
+  App-Prod:
+    build:
+      targets:
+        App: [profile, archive]
+        Framework: [profile, archive]
+    profile:
+      config: Prod
+    archive:
+      config: Prod
+  Framework:
+    build:
+      targets:
+        Framework: [test, analyze]
+    test:
+      config: Dev
+      gatherCoverageData: true
+      targets: [FrameworkUnitTests]
+  All Tests:
+    build:
+      targets:
+        App: [test]
+        Framework: [test]
+    test:
+      config: Dev
+      gatherCoverageData: true
+      targets: [FrameworkUnitTests, AppUITests]
